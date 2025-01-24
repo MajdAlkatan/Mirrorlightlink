@@ -28,23 +28,15 @@ let currentStage = 1;
 let statesHistory = [];
 let currentStateIndex = -1;
 
- const stageConfigurations = {
+const stageConfigurations = {
   1: {
     lightSource: { x: 9, y: 2, direction: "up-right" },
     target: { x: 3, y: 2 },
     mirrors: [
-      {
-        x: 6,
-        y: 5,
-        orientation: "180",
-        type: "rotatable",
-        moveRange: [{ x: 6, y: 5 }],
-      },
+      { x: 6, y: 5, orientation: "180", type: "rotatable", moveRange: [] },
     ],
     obstacles: [
       { x: 3, y: 1 },
-      { x: 4, y: 2 },
-      // { x: 4, y: 3 },
       { x: 4, y: 1 },
       { x: 5, y: 1 },
       { x: 6, y: 1 },
@@ -57,23 +49,8 @@ let currentStateIndex = -1;
     lightSource: { x: 5, y: 5, direction: "left" },
     target: { x: 9, y: 3 },
     mirrors: [
-      {
-        x: 5,
-        y: 0,
-        orientation: "-60",
-        type: "fixed",
-        moveRange: [{ x: 5, y: 0 }],
-      },
-      {
-        x: 2,
-        y: 3,
-        orientation: "90",
-        type: "rotatable",
-        moveRange: [
-          { x: 2, y: 3 },
-          { x: 2, y: 4 },
-        ],
-      },
+      { x: 5, y: 0, orientation: "-60", type: "fixed", moveRange: [] },
+      { x: 2, y: 3, orientation: "90", type: "rotatable", moveRange: [] },
     ],
     obstacles: [
       { x: 2, y: 0 },
@@ -94,20 +71,8 @@ let currentStateIndex = -1;
     lightSource: { x: 3, y: 1, direction: "down" },
     target: { x: 11, y: 1 },
     mirrors: [
-      {
-        x: 3,
-        y: 5,
-        orientation: "45",
-        type: "rotatable",
-        moveRange: [{ x: 3, y: 5 }],
-      },
-      {
-        x: 11,
-        y: 5,
-        orientation: "-45",
-        type: "rotatable",
-        moveRange: [{ x: 11, y: 5 }],
-      },
+      { x: 3, y: 5, orientation: "45", type: "rotatable", moveRange: [] },
+      { x: 11, y: 5, orientation: "-45", type: "rotatable", moveRange: [] },
     ],
     obstacles: [
       { x: 6, y: 1 },
@@ -119,54 +84,12 @@ let currentStateIndex = -1;
     lightSource: { x: 3, y: 0, direction: "down" },
     target: { x: 9, y: 0 },
     mirrors: [
-      {
-        x: 5,
-        y: 0,
-        orientation: "45",
-        type: "rotatable",
-        moveRange: [
-          { x: 5, y: 0 },
-          { x: 5, y: 1 },
-        ],
-      },
-      {
-        x: 5,
-        y: 2,
-        orientation: "45",
-        type: "rotatable",
-        moveRange: [
-          { x: 5, y: 2 },
-          { x: 5, y: 3 },
-        ],
-      },
-      {
-        x: 3,
-        y: 2,
-        orientation: "45",
-        type: "rotatable",
-        moveRange: [{ x: 3, y: 2 }],
-      },
-      {
-        x: 3,
-        y: 4,
-        orientation: "45",
-        type: "rotatable",
-        moveRange: [{ x: 3, y: 4 }],
-      },
-      {
-        x: 6,
-        y: 2,
-        orientation: "45",
-        type: "fixed",
-        moveRange: [{ x: 6, y: 2 }],
-      },
-      {
-        x: 9,
-        y: 4,
-        orientation: "45",
-        type: "fixed",
-        moveRange: [{ x: 9, y: 4 }],
-      },
+      { x: 5, y: 0, orientation: "45", type: "rotatable", moveRange: [] },
+      { x: 5, y: 2, orientation: "45", type: "rotatable", moveRange: [] },
+      { x: 3, y: 2, orientation: "45", type: "rotatable", moveRange: [] },
+      { x: 3, y: 4, orientation: "45", type: "rotatable", moveRange: [] },
+      { x: 6, y: 2, orientation: "45", type: "fixed", moveRange: [] },
+      { x: 9, y: 4, orientation: "45", type: "fixed", moveRange: [] },
     ],
     obstacles: [
       { x: 3, y: 1 },
@@ -178,28 +101,8 @@ let currentStateIndex = -1;
     lightSource: { x: 1, y: 0, direction: "down-right" },
     target: { x: 12, y: 3 },
     mirrors: [
-      {
-        x: 5,
-        y: 2,
-        orientation: "90",
-        type: "horizontalMove",
-        moveRange: [
-          { x: 5, y: 2 },
-          { x: 5, y: 3 },
-          { x: 5, y: 4 },
-        ],
-      },
-      {
-        x: 10,
-        y: 0,
-        orientation: "90",
-        type: "verticalMove",
-        moveRange: [
-          { x: 10, y: 0 },
-          { x: 9, y: 0 },
-          { x: 8, y: 0 },
-        ],
-      },
+      { x: 5, y: 2, orientation: "90", type: "horizontalMove", moveRange: [{ x: 5, y: 2 }, { x: 5, y: 3 }, { x: 5, y: 4 }] },
+      { x: 10, y: 0, orientation: "90", type: "verticalMove", moveRange: [{ x: 10, y: 0 }, { x: 9, y: 0 }, { x: 8, y: 0 }] },
     ],
     obstacles: [
       { x: 5, y: 0 },
@@ -213,54 +116,17 @@ let currentStateIndex = -1;
     lightSource: { x: 2, y: 0, direction: "right" },
     target: { x: 10, y: 5 },
     mirrors: [
-      {
-        x: 2,
-        y: 4,
-        orientation: "-45",
-        type: "horizontalMove",
-        moveRange: [
-          { x: 2, y: 4 },
-          { x: 2, y: 5 },
-        ],
-      },
-      {
-        x: 5,
-        y: 5,
-        orientation: "45",
-        type: "verticalMove",
-        moveRange: [
-          { x: 5, y: 5 },
-          { x: 6, y: 5 },
-          { x: 7, y: 5 },
-        ],
-      },
-      {
-        x: 8,
-        y: 0,
-        orientation: "45",
-        type: "verticalMove",
-        moveRange: [
-          { x: 8, y: 0 },
-          { x: 7, y: 0 },
-          { x: 6, y: 0 },
-        ],
-      },
-      {
-        x: 10,
-        y: 1,
-        orientation: "-45",
-        type: "horizontalMove",
-        moveRange: [
-          { x: 10, y: 1 },
-          { x: 10, y: 0 },
-        ],
-      },
+      { x: 2, y: 4, orientation: "-45", type: "horizontalmove", moveRange: [[2, 4], [2, 5]] },
+      { x: 5, y: 5, orientation: "45", type: "verticalmove", moveRange: [[5, 5], [6, 5], [7, 5]] },
+      { x: 8, y: 0, orientation: "45", type: "verticalmove", moveRange: [[8, 0], [7, 0], [6, 0]] },
+      { x: 10, y: 1, orientation: "-45", type: "horizontalmove", moveRange: [[10, 1], [10, 0]] },
     ],
     obstacles: [
       { x: 3, y: 2 },
       { x: 3, y: 3 },
       { x: 4, y: 2 },
       { x: 4, y: 3 },
+      { x: 6, y: 2 },
       { x: 6, y: 2 },
       { x: 8, y: 2 },
       { x: 8, y: 3 },
@@ -270,52 +136,12 @@ let currentStateIndex = -1;
   },
   7: {
     lightSource: { x: 2, y: 2, direction: "right" },
-    target: { x: 10, y: 3 },
+    target: { x: 11, y: 3 },
     mirrors: [
-      {
-        x: 4,
-        y: 5,
-        orientation: "-45",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 4, y: 5 },
-          { x: 3, y: 4 },
-          { x: 2, y: 3 },
-        ],
-      },
-      {
-        x: 5,
-        y: 5,
-        orientation: "45",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 5, y: 5 },
-          { x: 6, y: 4 },
-          { x: 7, y: 3 },
-        ],
-      },
-      {
-        x: 8,
-        y: 0,
-        orientation: "45",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 8, y: 0 },
-          { x: 7, y: 1 },
-          { x: 6, y: 2 },
-        ],
-      },
-      {
-        x: 9,
-        y: 0,
-        orientation: "-45",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 9, y: 0 },
-          { x: 10, y: 1 },
-          { x: 11, y: 2 },
-        ],
-      },
+      { x: 4, y: 5, orientation: "-45", type: "diagonalalmove", moveRange: [[4, 5], [3, 4], [2, 3]] },
+      { x: 5, y: 5, orientation: "45", type: "diagonalmove", moveRange: [[5, 5], [6, 4], [7, 3]] },
+      { x: 8, y: 0, orientation: "45", type: "diagonalmove", moveRange: [[8, 0], [7, 1], [6, 2]] },
+      { x: 9, y: 0, orientation: "-45", type: "diagonalmove", moveRange: [[9, 0], [10, 1], [11, 2]] },
     ],
     obstacles: [
       { x: 4, y: 2 },
@@ -326,30 +152,8 @@ let currentStateIndex = -1;
     lightSource: { x: 11, y: 5, direction: "up-left" },
     target: { x: 5, y: 5 },
     mirrors: [
-      {
-        x: 3,
-        y: 1,
-        orientation: "180",
-        type: "horizontalMove",
-        moveRange: [
-          { x: 3, y: 1 },
-          { x: 3, y: 2 },
-          { x: 3, y: 3 },
-          { x: 3, y: 4 },
-        ],
-      },
-      {
-        x: 8,
-        y: 2,
-        orientation: "90",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 9, y: 3 },
-          { x: 8, y: 2 },
-          { x: 7, y: 1 },
-          { x: 6, y: 0 },
-        ],
-      },
+      { x: 3, y: 1, orientation: "180", type: "horizontalmove", moveRange: [[3, 1], [3, 2], [3, 3], [3, 4]] },
+      { x: 8, y: 2, orientation: "90", type: "diagonalmove", moveRange: [[9, 3], [8, 2], [7, 1], [6, 0]] },
     ],
     obstacles: [
       { x: 6, y: 5 },
@@ -360,50 +164,8 @@ let currentStateIndex = -1;
     lightSource: { x: 6, y: 1, direction: "up" },
     target: { x: 8, y: 1 },
     mirrors: [
-      {
-        x: 4,
-        y: 0,
-        orientation: "45",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 4, y: 0 },
-          { x: 3, y: 1 },
-          { x: 2, y: 2 },
-        ],
-      },
-      {
-        x: 2,
-        y: 3,
-        orientation: "-45",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 2, y: 3 },
-          { x: 3, y: 4 },
-          { x: 4, y: 5 },
-        ],
-      },
-      {
-        x: 9,
-        y: 0,
-        orientation: "-45",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 9, y: 0 },
-          { x: 10, y: 1 },
-          { x: 11, y: 2 },
-        ],
-      },
-      {
-        x: 9,
-        y: 5,
-        orientation: "45",
-        type: "diagonalMove",
-        moveRange: [
-          { x: 9, y: 5 },
-          { x: 10, y: 4 },
-          { x: 11, y: 3 },
-        ],
-      },
+      { x: 4, y: 0, orientation: "45", type: "diagonalmove", moveRange: [[4, 0], [3, 1], [2, 2]] },
+      { x: 2, y: 3, orientation: "-45", type: "diagonalmove", moveRange: [[2, 3], [3, 4], [4, 5]] },
     ],
     obstacles: [
       { x: 4, y: 2 },
@@ -415,18 +177,7 @@ let currentStateIndex = -1;
     lightSource: { x: 3, y: 2, direction: "right" },
     target: { x: 8, y: 2 },
     mirrors: [
-      {
-        x: 3,
-        y: 0,
-        orientation: "45",
-        type: "verticalMove",
-        moveRange: [
-          { x: 3, y: 0 },
-          { x: 3, y: 1 },
-          { x: 3, y: 2 },
-          { x: 3, y: 3 },
-        ],
-      },
+      { x: 3, y: 0, orientation: "45", type: "verticalmove", moveRange: [[3, 0], [3, 1], [3, 2], [3, 3]] },
     ],
     obstacles: [
       { x: 4, y: 1 },
@@ -436,6 +187,7 @@ let currentStateIndex = -1;
     ],
   },
 };
+
 function initGrid() {
   grid = Array.from({ length: gridSize.rows }, (_, x) =>
     Array.from({ length: gridSize.cols }, (_, y) => new Cell(x, y, "empty"))
