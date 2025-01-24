@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Path Simulation Game</title>
+    <style>
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(6, 50px);
+            grid-template-rows: repeat(13, 50px);
+            gap: 2px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .lightSource { background-color: yellow; }
+        .target { background-color: green; }
+        .mirror { background-color: lightblue; }
+        .obstacle { background-color: darkgrey; }
+        .laser { background-color: red; }
+        .form-container { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <form id="setupForm">
+        <h3>Setup Game</h3>
+        <label>Light Source Location (x, y) and Direction:</label>
+        <input type="number" id="lightX" placeholder="x" min="0" max="12">
+        <input type="number" id="lightY" placeholder="y" min="0" max="5">
+        <select id="lightDirection">
+            <option value="up">Up</option>
+            <option value="down">Down</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+        </select>
+        <br>
+        <label>Target Location (x, y):</label>
+        <input type="number" id="targetX" placeholder="x" min="0" max="12">
+        <input type="number" id="targetY" placeholder="y" min="0" max="5">
+        <br>
+        <label>Number of Mirrors:</label>
+        <input type="number" id="numMirrors" min="0">
+        <br>
+        <label>Mirror Type:</label>
+        <select id="mirrorType">
+            <option value="fixed">Fixed</option>
+            <option value="rotatable">Rotatable</option>
+        </select>
+        <br>
+        <label>Mirror Locations (x, y):</label>
+        <input type="text" id="mirrorLocations" placeholder="e.g., 1,2; 3,4">
+        <br>
+        <label>Number of Obstacles:</label>
+        <input type="number" id="numObstacles" min="0">
+        <br>
+        <label>Obstacle Locations (x, y):</label>
+        <input type="text" id="obstacleLocations" placeholder="e.g., 5,6; 7,8">
+        <br>
+        <button type="button" id="">Start Game</button>
+    </form>
+</div>
+
+<div id="grid"></div>
+
+<script>
+    const gridElement = document.getElementById('grid');
+    const startGameButton = document.getElementById('startGame');
+    const gridSize = { rows: 13, cols: 6 };
+    let grid = [];
+    let lightPath;
+
+    class Cell {
+        constructor(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.type = type;
+        }
+    }
+
+    class LightSource extends Cell {
+        constructor(x, y, direction) {
+            super(x, y, "lightSource");
+            this.direction = direction;
+        }
+    }
+
+    class Target extends Cell {
+        constructor(x, y) {
+            super(x, y, "target");
+        }
+    }
+
+    class Mirror extends Cell {
+        constructor(x, y, orientation, mirrorType = "rotatable") {
+            super(x, y, "mirror");
+            this.orientation = orientation;
+            this.mirrorType = mirrorType;
+        }
+
+        rotate() {
+            if (this.mirrorType === "rotatable") {
+                switch (this.orientation) {
+                    case "45": this.orientation = "-45"; break;
+                    case "-45": this.orientation = "30"; break;
+                    case "30": this.orientation = "-30"; break;
+                    case "-30": this.orientation = "60"; break;
+                    case "60": this.orientation = "-60"; break;
+                    case "-60": this.orientation = "90"; break;
+                    case "90": this.orientation = "180"; break;
+                    default: this.orientation = "45";
+                }
+            }
+        }
+    }
+
+    class ObstacleCell extends Cell {
+        constructor(x, y) {
+            super(x, y, "obstacle");
+        }
+    }
+
+    class LightPath {
+        constructor(startPosition, direction) {
+            this.positions = [];
+            this.currentDirection = direction;
+            this.addPosition(startPosition, null);
+        }
+
+        addPosition(position, orientation) {
+            this.positions.push({ position, orientation: orientation || this.currentDirection });
+        }
+
+        clearPath() {
+            this.positions = [];
+        }
+
+        getCurrentPath() {
+            return this.positions;
+        }
+
+        updateDirection(newDirection) {
+            this.currentDirection = newDirection;
+        }
+    }
+
+    class State {
+        constructor(grid, lightPosition) {
+            this.grid = grid;
+            this.lightPosition = lightPosition;
+            this.isWon = false;
+        }
+
+        getCurrentLightPath() {
+            const lightSource = this.grid[this.lightPosition.x][this.lightPosition.y];
+            const path = [];
+            let currentPos = { ...this.lightPosition };
+            let direction = lightSource.direction;
+
+            while (true) {
+                if (
+                    currentPos.x < 0 ||
+                    currentPos.x >= this.grid.length ||
+                    currentPos.y < 0 ||
+                    currentPos.y >= this.grid[0].length
+                ) {
+                    break;
+                }
+
+                const cell = this.grid[currentPos.x][currentPos.y];
+                path.push({ ...currentPos });
+
+                if (cell instanceof Target) {
+                    this.isWon = true;
+                    break;
+                }
+
+                if (
+                    cell instanceof LightSource &&
+                    currentPos.x === this.lightPosition.x &&
+                    currentPos.y === this.lightPosition.y &&
+                    path.length > 1
+                ) {
+                    break;
+                }
+
+                if (cell instanceof ObstacleCell) {
+                    break;
+                }
+
+                if (cell instanceof Mirror) {
+                    const newDirection = getNextDirection(direction, cell.orientation);
+
+                    direction = newDirection;
+                }
+
+                switch (direction) {
+                    case "right": currentPos = { x: currentPos.x, y: currentPos.y + 1 }; break;
+                    case "down": currentPos = { x: currentPos.x + 1, y: currentPos.y }; break;
+                    case "left": currentPos = { x: currentPos.x, y: currentPos.y - 1 }; break;
+                    case "up": currentPos = { x: currentPos.x - 1, y: currentPos.y }; break;
+                    case "down-right": currentPos = { x: currentPos.x + 1, y: currentPos.y + 1 }; break;
+                    case "down-left": currentPos = { x: currentPos.x + 1, y: currentPos.y - 1 }; break;
+                    case "up-right": currentPos = { x: currentPos.x - 1, y: currentPos.y + 1 }; break;
+                    case "up-left": currentPos = { x: currentPos.x - 1, y: currentPos.y - 1 }; break;
+                }
+            }
+            return path;
+        }
+    }
+
+    function getNextDirection(currentDirection, mirrorOrientation) {
+        switch (mirrorOrientation) {
+            case "45":
+                switch (currentDirection) {
+                    case "up": return "right";
+                    case "down": return "left";
+                    case "left": return "down";
+                    case "right": return "up";
+                }
+                break;
+            case "-45":
+                switch (currentDirection) {
+                    case "up": return "left";
+                    case "down": return "right";
+                    case "left": return "up";
+                    case "right": return "down";
+                }
+                break;
+            case "30":
+                switch (currentDirection) {
+                    case "up": return "down-right";
+                    case "down": return "up-left";
+                    case "left": return "down-left";
+                    case "right": return "up-right";
+                }
+                break;
+            case "-30":
+                switch (currentDirection) {
+                    case "up": return "down-left";
+                    case "down": return "up-right";
+                    case "left": return "up-left";
+                    case "right": return "down-right";
+                }
+                break;
+            case "-60":
+                switch (currentDirection) {
+                    case "up": return "down-right";
+                    case "down": return "up-left";
+                    case "left": return "up-right";
+                    case "right": return "down-left";
+                }
+                break;
+            case "60":
+                switch (currentDirection) {
+                    case "up": return "down-left";
+                    case "down": return "up-right";
+                    case "left": return "down-right";
+                    case "right": return "up-left";
+                }
+                break;
+            case "90":
+                switch (currentDirection) {
+                    case "up-left": return "up-right";
+                    case "down-left": return "down-right";
+                    case "down-right": return "down-left";
+                    case "up-right": return "up-left";
+                }
+                break;
+            case "180":
+                switch (currentDirection) {
+                    case "up": return "down";
+                    case "down": return "up";
+                    case "left": return "right";
+                    case "right": return "left";
+                }
+                break;
+        }
+        return currentDirection;
+    }
+
+    function initGrid() {
+        grid = Array.from({ length: gridSize.rows }, (_, x) =>
+            Array.from({ length: gridSize.cols }, (_, y) => new Cell(x, y, 'empty'))
+        );
+
+        renderGrid();
+    }
+
+    function renderGrid() {
+        gridElement.innerHTML = '';
+
+        grid.forEach(row => {
+            row.forEach(cell => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = `cell ${cell.type}`;
+                cellDiv.dataset.x = cell.x;
+                cellDiv.dataset.y = cell.y;
+
+                gridElement.appendChild(cellDiv);
+            });
+        });
+
+        if (lightPath) {
+            lightPath.getCurrentPath().forEach(({ position, orientation }) => {
+                const pathCell = gridElement.querySelector(`.cell[data-x="${position.x}"][data-y="${position.y}"]`);
+                if (pathCell) {
+                    pathCell.classList.add('laser', orientation);
+                }
+            });
+        }
+    }
+
+    function updateLightPath() {
+        const lightSourcePosition = { x: parseInt(document.getElementById('lightX').value), y: parseInt(document.getElementById('lightY').value) };
+        const lightSource = grid[lightSourcePosition.x][lightSourcePosition.y];
+        lightPath = new LightPath(lightSourcePosition, lightSource.direction);
+        lightPath.clearPath();
+        const path = new State(grid, lightSourcePosition).getCurrentLightPath();
+
+        let targetReached = false;
+
+        for (const pos of path) {
+            const cell = grid[pos.x][pos.y];
+            if (cell instanceof Target) {
+                targetReached = true;
+            }
+            lightPath.addPosition(pos, lightSource.direction);
+        }
+
+        renderGrid();
+
+        if (targetReached) {
+            alert("You win the game!");
+        }
+    }
+
+    startGameButton.addEventListener('click', () => {
+        initGrid();
+
+        const lightX = parseInt(document.getElementById('lightX').value);
+        const lightY = parseInt(document.getElementById('lightY').value);
+        const lightDirection = document.getElementById('lightDirection').value;
+        grid[lightX][lightY] = new LightSource(lightX, lightY, lightDirection);
+
+        const targetX = parseInt(document.getElementById('targetX').value);
+        const targetY = parseInt(document.getElementById('targetY').value);
+        grid[targetX][targetY] = new Target(targetX, targetY);
+
+        const mirrorType = document.getElementById('mirrorType').value;
+        const mirrorLocations = document.getElementById('mirrorLocations').value.split(';').map(loc => loc.split(',').map(Number));
+        mirrorLocations.forEach(([x, y]) => {
+            grid[x][y] = new Mirror(x, y, "45", mirrorType);
+        });
+
+        const obstacleLocations = document.getElementById('obstacleLocations').value.split(';').map(loc => loc.split(',').map(Number));
+        obstacleLocations.forEach(([x, y]) => {
+            grid[x][y] = new ObstacleCell(x, y);
+        });
+
+        updateLightPath();
+    });
+
+    window.onload = () => {
+        initGrid();
+    };
+</script>
+
+</body>
+</html>
+<!--  -->

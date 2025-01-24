@@ -1,0 +1,427 @@
+class StateManager {
+  constructor(gridWidth, gridHeight, lightSourcePosition, stageConfigurationss, currentStagee) {
+    this.gridWidth = gridWidth;
+    this.gridHeight = gridHeight;
+    this.lightSourcePosition = lightSourcePosition;
+    this.stageConfigurationss = stageConfigurationss;
+    this.currentStagee = currentStagee;
+    const currentStage = this.stageConfigurationss[this.currentStagee];
+
+    this.lightSourcePosition = currentStage.lightSource;
+
+    this.initialGrid = this.createEmptyGrid();
+    this.initializeGridWithObjects();
+  }
+
+  createEmptyGrid() {
+    return Array.from({ length: this.gridHeight }, () => Array(this.gridWidth).fill("[     ]"));
+  }
+
+  initializeGridWithObjects() {
+    this.initialGrid = this.createEmptyGrid();
+
+    if (this.lightSourcePosition && this.lightSourcePosition.x < this.gridHeight && this.lightSourcePosition.y < this.gridWidth) {
+      this.initialGrid[this.lightSourcePosition.x][this.lightSourcePosition.y] = '[   L   ]';
+    }
+  
+    const stageConfig = this.stageConfigurationss[this.currentStagee];
+
+    if (stageConfig) {
+      const { x: targetX, y: targetY } = stageConfig.target;
+      if (targetX < this.gridHeight && targetY < this.gridWidth) {
+        this.initialGrid[targetX][targetY] = '[   T   ]';
+      }
+
+      stageConfig.mirrors.forEach(({ x, y, orientation }) => {
+        if (x < this.gridHeight && y < this.gridWidth) {
+          this.initialGrid[x][y] = `[ M${orientation} ]`;
+        }
+      });
+
+      stageConfig.obstacles.forEach(({ x, y }) => {
+        if (x < this.gridHeight && y < this.gridWidth) {
+          this.initialGrid[x][y] = '[   O   ]';
+        }
+      });
+    }
+  }
+
+  getCurrentLightPath() {
+    const path = [];
+    let currentPos = { ...this.lightSourcePosition };
+    let direction = this.lightSourcePosition.direction;
+
+    while (true) {
+      currentPos = moveLight(currentPos, direction);
+
+      if (
+        currentPos.x < 0 || currentPos.x >= this.gridHeight ||
+        currentPos.y < 0 || currentPos.y >= this.gridWidth
+      ) break;
+
+      const cell = this.initialGrid[currentPos.x][currentPos.y];
+
+      path.push({ ...currentPos });
+
+      if (cell === '[   O   ]' || cell === '[   T   ]') break;
+
+      if (cell.startsWith('[ M')) {
+        const mirrorOrientation = this.stageConfigurationss[this.currentStagee].mirrors.find(m => m.x === currentPos.x && m.y === currentPos.y).orientation;
+        direction = getNextDirection(direction, mirrorOrientation);
+      }
+    }
+
+    return path;
+  }
+  updateGridWithLightPath(path) {
+    const gridCopy = this.createEmptyGrid();
+
+    path.forEach(pos => {
+      if (gridCopy[pos.x][pos.y] === '[     ]') {
+        gridCopy[pos.x][pos.y] = '[   *   ]';
+      }
+    });
+
+    const stageConfig = this.stageConfigurationss[this.currentStagee];
+
+    if (this.lightSourcePosition && this.lightSourcePosition.x < this.gridHeight && this.lightSourcePosition.y < this.gridWidth) {
+      gridCopy[this.lightSourcePosition.x][this.lightSourcePosition.y] = '[   L   ]';
+    }
+
+    const { x: targetX, y: targetY } = stageConfig.target;
+    if (targetX < this.gridHeight && targetY < this.gridWidth) {
+      gridCopy[targetX][targetY] = '[   T   ]';
+    }
+
+    stageConfig.mirrors.forEach(({ x, y, orientation }) => {
+      if (x < this.gridHeight && y < this.gridWidth) {
+        gridCopy[x][y] = `[ M${orientation} ]`;
+      }
+    });
+
+    stageConfig.obstacles.forEach(({ x, y }) => {
+      if (x < this.gridHeight && y < this.gridWidth) {
+        gridCopy[x][y] = '[   O   ]';
+      }
+    });
+
+    return gridCopy;
+  }
+
+
+  updateCurrentStage(stageId) {
+    if (this.stageConfigurationss[stageId]) {
+      this.currentStagee = stageId;
+      this.initializeGridWithObjects();
+    } else {
+      console.error(`Stage ${stageId} does not exist`);
+    }
+  }
+
+  // 1. GetNextState: Generate all possible next states based on rotating the light source or a mirror
+  GetNextState() {
+    const states = [];
+    states.push(...this.getAllLightSourceRotations());
+    states.push(...this.getAllMirrorRotations());
+
+    return states.map(state => ({
+      ...state,
+      isGoal: this.isGoalState(state.lightPath),
+      stageId: this.currentStagee // إضافة معرف المرحلة إلى كل حالة
+    }));
+  }
+
+
+
+  
+
+
+  // Helper method to check if the position is valid
+  isPositionValid(position) {
+    return position.x >= 0 && position.x < this.gridHeight && position.y >= 0 && position.y < this.gridWidth &&
+      !(this.initialGrid[position.x][position.y] instanceof ObstacleCell);
+  }
+  getAllLightSourceRotations() {
+    const states = [];
+    const lightRotations = ['up', 'down', 'left', 'right', 'up-left', 'up-right', 'down-left', 'down-right'];
+    const originalDirection = this.lightSourcePosition.direction;
+
+    for (const rotation of lightRotations) {
+      this.lightSourcePosition.direction = rotation;
+      const path = this.getCurrentLightPath();
+      const gridWithPath = this.updateGridWithLightPath(path);
+      states.push({
+        grid: gridWithPath,
+        lightSourcePosition: { ...this.lightSourcePosition },
+        lightPath: path
+      });
+    }
+
+    this.lightSourcePosition.direction = originalDirection;
+
+    return states;
+  }
+  // Get all possible states resulting from mirror rotations
+  getAllMirrorRotations() {
+    const states = [];
+    const mirrorOrientations = ['45', '-45', '60', '-60', '90', '180'];
+    const stageConfig = this.stageConfigurationss[this.currentStagee];
+  
+    for (const mirror of stageConfig.mirrors) {
+      if (mirror.type === "rotatable") { // Check if mirror is rotatable
+        const originalOrientation = mirror.orientation;
+  
+        for (const orientation of mirrorOrientations) {
+          mirror.orientation = orientation;
+          const path = this.getCurrentLightPath();
+          const gridWithPath = this.updateGridWithLightPath(path);
+          states.push({
+            grid: gridWithPath,
+            lightSourcePosition: { ...this.lightSourcePosition },
+            lightPath: path,
+            mirrors: JSON.parse(JSON.stringify(stageConfig.mirrors))
+          });
+        }
+  
+        mirror.orientation = originalOrientation;
+      }
+    }
+  
+    return states;
+  }
+  // Get all possible states resulting from light source rotations
+  generateAllStates() {
+    const states = [];
+    const lightRotations = ['up', 'down', 'left', 'right', 'up-left', 'up-right', 'down-left', 'down-right'];
+    const mirrorOrientations = ['45', '-45', '60', '-60', '90', '180'];
+  
+    for (const lightRotation of lightRotations) {
+      this.lightSourcePosition.direction = lightRotation;
+  
+      const stageConfig = this.stageConfigurationss[this.currentStagee];
+      const mirrors = stageConfig.mirrors;
+  
+      this.rotateMirrorsRecursively(mirrors, 0, mirrorOrientations, states);
+    }
+  
+    return states;
+  }
+  
+  rotateMirrorsRecursively(mirrors, index, orientations, states) {
+    if (index === mirrors.length) {
+      const path = this.getCurrentLightPath();
+  
+      // Check if the light path intersects with any mirror
+      const stageConfig = this.stageConfigurationss[this.currentStagee];
+      const mirrorsHit = path.some(pos =>
+        stageConfig.mirrors.some(mirror => mirror.x === pos.x && mirror.y === pos.y)
+      );
+  
+      if (mirrorsHit) {
+        const gridWithPath = this.updateGridWithLightPath(path);
+        const isGoal = this.isGoalState(path);
+  
+        states.push({
+          grid: gridWithPath,
+          lightSourcePosition: { ...this.lightSourcePosition },
+          lightPath: path,
+          mirrors: JSON.parse(JSON.stringify(mirrors)),
+          isGoal: isGoal,
+        });
+      }
+  
+      return;
+    }
+  
+    const currentMirror = mirrors[index];
+    const originalOrientation = currentMirror.orientation;
+  
+    if (currentMirror.type === "rotatable") {
+      for (const orientation of orientations) {
+        currentMirror.orientation = orientation;
+        this.rotateMirrorsRecursively(mirrors, index + 1, orientations, states);
+      }
+      currentMirror.orientation = originalOrientation; // Restore original orientation
+    } else {
+      this.rotateMirrorsRecursively(mirrors, index + 1, orientations, states);
+    }
+  }
+  
+  
+
+  
+  isGoalState(lightPath) {
+    const stageConfig = this.stageConfigurationss[this.currentStagee];
+    const { x: targetX, y: targetY } = stageConfig.target;
+
+    if (!lightPath || lightPath.length === 0) {
+      return false;
+    }
+
+    const lastPoint = lightPath[lightPath.length - 1];
+    return lastPoint && lastPoint.x === targetX && lastPoint.y === targetY;
+  }
+
+  printGrid(grid) {
+    console.log("\n");
+    console.log("╔" + "═".repeat(grid[0].length * 9 + 1) + "╗"); // Adjusted for better spacing
+
+    grid.forEach((row, rowIndex) => {
+        let rowString = "║"; // Changed to '║' for a better border
+        row.forEach((cell, colIndex) => {
+            switch (cell) {
+                case '[   L   ]':
+                    rowString += '\x1b[32m' + cell + '\x1b[0m '; // Green light source
+                    break;
+                case '[   T   ]':
+                    rowString += '\x1b[31m' + cell + '\x1b[0m '; // Red target
+                    break;
+                case '[   O   ]':
+                    rowString += '\x1b[34m' + cell + '\x1b[0m '; // Blue obstacles
+                    break;
+                default:
+                    if (cell.startsWith('[ M')) {
+                        rowString += '\x1b[33m' + cell + '\x1b[0m '; // Yellow mirrors
+                    } else if (cell === '[   *   ]') {
+                        rowString += '\x1b[35m' + cell + '\x1b[0m '; // Magenta light path
+                    } else {
+                        rowString += ' ' + cell + ' '; // Default cell
+                    }
+            }
+        });
+        console.log(rowString + "║"); // Changed to '║' for a better border
+        
+        if (rowIndex < grid.length - 1) {
+            console.log("╠" + "═".repeat(grid[rowIndex].length * 9 + 1) + "╣"); // Adjusted for better spacing
+        }
+    });
+
+    console.log("╚" + "═".repeat(grid[grid.length - 1].length * 9 + 1) + "╝"); // Adjusted for better spacing
+}
+  
+  
+ 
+    
+
+  // 2. GenerateStateChild: Generate a single next state based on an action (rotate light source or rotate mirror)
+  GenerateStateChild(action) {
+    let newState;
+
+    if (action.type === 'rotateLightSource') {
+      this.lightSourcePosition.direction = action.direction;
+      newState = this.cloneState();
+      this.lightSourcePosition.direction = action.originalDirection;
+    } else if (action.type === 'rotateMirror') {
+      this.setMirrorRotation(action.x, action.y, action.angle);
+      newState = this.cloneState();
+      this.setMirrorRotation(action.x, action.y, action.originalAngle);
+    }
+
+    const path = this.getCurrentLightPath();
+
+    return {
+      ...newState,
+      lightPath: path,
+      isGoal: this.isGoalState(path),
+      grid: this.updateGridWithLightPath(path),
+      stageId: this.currentStagee // إضافة معرف المرحلة إلى الحالة الناتجة
+    };
+  }
+
+
+  // Helper method to clone the current state (deep copy)
+  cloneState() {
+    return JSON.parse(JSON.stringify({
+      grid: this.initialGrid,
+      lightSourcePosition: this.lightSourcePosition,
+    }));
+  }
+
+  // Helper to set mirror rotation (adjust this as needed based on your logic)
+  setMirrorRotation(x, y, angle) {
+    if (this.initialGrid[x] && this.initialGrid[x][y]) {
+      this.initialGrid[x][y] = { type: 'Mirror', rotation: angle };
+    }
+  }
+
+  // Helper to get the current mirror rotation (adjust based on your implementation)
+  getMirrorRotation(x, y) {
+    const cell = this.initialGrid[x] && this.initialGrid[x][y];
+    return cell ? cell.rotation : 0;  // Return current rotation (default to 0)
+  }
+}
+
+
+// Example usage
+const currentStagee = 4;
+const stateManager = new StateManager(6, 13, { x: 3, y: 0, direction: 'down' }, stageConfigurationss, currentStagee);
+stateManager.initializeGridWithObjects();
+
+const allGetNextStates = stateManager.GetNextState();
+allGetNextStates.forEach((state, index) => {
+  console.log(`State ${index + 1}:`);
+  stateManager.printGrid(state.grid);
+  console.log("Light source:", state.lightSourcePosition);
+  console.log("Light path:", state.lightPath);
+  console.log("Mirrors:", state.mirrors);
+  console.log(`Is Goal: ${state.isGoal}`);
+  
+  console.log();
+});
+
+
+uniformCostSearch() {
+    const priorityQueue = [];
+    const visited = new Set();
+
+    priorityQueue.push({
+      state: this.cloneState(),
+      path: [],
+      cost: 0,
+
+    });
+
+    while (priorityQueue.length > 0) {
+
+      priorityQueue.sort((a, b) => a.cost - b.cost);
+
+
+      const { state, path, cost } = priorityQueue.shift();
+      const stateKey = this.getStateKey(state);
+
+
+      if (visited.has(stateKey)) {
+        continue;
+      }
+
+      visited.add(stateKey);
+
+      if (this.isGoalState(state.lightPath)) {
+        return {
+          path: [...path, state],
+          cost: cost,
+          found: true,
+        };
+      }
+
+
+      const nextStates = this.generateAllStates();
+
+      for (const nextState of nextStates) {
+        const nextStateKey = this.getStateKey(nextState);
+
+        if (!visited.has(nextStateKey)) {
+          const nextPath = [...path, state];
+          const transitionCost = this.calculateTransitionCost(state, nextState);
+          const nextCost = cost + transitionCost;
+          priorityQueue.push({
+            state: nextState,
+            path: nextPath,
+            cost: nextCost,
+          });
+        }
+      }
+    }
+
+    return { found: false };
+  }

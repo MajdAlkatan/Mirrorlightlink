@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Light Path Simulation Game</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <h1>Light Path Simulation Game</h1>
+    <div class="star-layer"></div>
+    <div class="star-layer star-layer-2"></div>
+    <div class="star-layer star-layer-3"></div>
+
+    <!-- Game Setup Form -->
+    <div class="stages">
+      <button class="stage-button" data-stage="1">Stage 1</button>
+      <button class="stage-button" data-stage="2" disabled>Stage 2</button>
+      <button class="stage-button" data-stage="3" disabled>Stage 3</button>
+      <button class="stage-button" data-stage="4" disabled>Stage 4</button>
+      <button class="stage-button" data-stage="5" disabled>Stage 5</button>
+      <button class="stage-button" data-stage="6" disabled>Stage 6</button>
+      <button class="stage-button" data-stage="7" disabled>Stage 7</button>
+      <button class="stage-button" data-stage="8" disabled>Stage 8</button>
+      <button class="stage-button" data-stage="9" disabled>Stage 9</button>
+      <button class="stage-button" data-stage="10" disabled>Stage 10</button>
+    </div>
+
+    <div class="main" style="display: none">
+      <div id="grid" class="grid"></div>
+      <div class="blocks">
+        <button id="resetButton">Reset Game</button>
+        <button id="diagonalMovedownright">
+          Move diagonal Mirror (down-right)
+        </button>
+        <button id="diagonalMovedownleft">
+          Move diagonal Mirror (down-left)
+        </button>
+        <button id="diagonalMoveupright">
+          Move diagonal Mirror (up-right)
+        </button>
+        <button id="diagonalMoveupleft">Move diagonal Mirror (up-left)</button>
+        <button id="Rotate">Rotate Mirror</button>
+        <button id="verticalMoveup">Move vertical Mirror up</button>
+        <button id="verticalMovedown">Move vertical Mirror down</button>
+        <button id="horizontalMoveright">Move horizontal Mirror right</button>
+        <button id="horizontalMoveleft">Move horizontal Mirror left</button>
+      </div>
+    </div>
+
+    <div id="winMessage" style="display: none">You win the game!</div>
+
+    <script  src="js/classes.js"></script>
+    <script  src="js/lightpath.js"></script>
+    <script  src="js/state.js"></script>
+    <script  src="js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,684 @@
+body {
+  font-family: "Arial", sans-serif;
+  background: radial-gradient(circle at center, #191f50, #050611);
+  /* Space gradient */
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  perspective: 10000px;
+  /* Perspective for 3D effect */
+  overflow: hidden;
+  /* Prevent scrollbars */
+}
+@media (max-width: 320px) {
+  body {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 10px;
+  }
+
+  .main {
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center;
+  }
+}
+
+/* Star Layers */
+.star-layer,
+.star-layer-2,
+.star-layer-3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 0, 0.8), transparent 2px),
+    /* Bright Yellow stars */
+      radial-gradient(circle, rgb(255, 105, 180), transparent 3px),
+    /* Pink stars */
+      radial-gradient(circle, rgba(0, 255, 127, 0.5), transparent 5px)
+      /* Spring Green stars */;
+  /* Magenta stars */
+  background-size: 50px 50px, 80px 80px, 120px 120px, 100px 100px, 150px 150px;
+  pointer-events: none;
+  opacity: 0.7;
+  /* Higher opacity for more vibrant colors */
+}
+
+.star-layer {
+  animation: animateStars 30s linear infinite;
+  opacity: 0.6;
+}
+
+.star-layer-2 {
+  animation: animateStars 40s linear infinite reverse;
+  opacity: 0.4;
+}
+
+.star-layer-3 {
+  animation: animateStars 50s linear infinite;
+  opacity: 0.3;
+}
+
+/* Animation Keyframes */
+@keyframes animateStars {
+  from {
+    transform: translateY(0) translateX(0);
+  }
+
+  to {
+    transform: translateY(-100px) translateX(-100px);
+  }
+}
+
+@keyframes spinGalaxy {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+h1 {
+  margin-bottom: 20px;
+  color: #ffffff;
+  /* Light text for space theme */
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Layout Containers */
+.main {
+  display: flex;
+  justify-content: center;
+  perspective: 1000px; /* Add perspective for 3D effect */
+}
+
+.grid {
+  margin-right: 60px;
+  position: relative;
+  bottom: 16%;
+  width: 100%;
+  max-width: 380px; /* Limit grid width */
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, 60px);
+  grid-template-rows: repeat(13, 60px);
+  gap: 4px;
+  transform-style: preserve-3d; /* Enable 3D transformations */
+  transform: rotateX(35deg) rotateY(35deg) rotateY(-35deg); /* Tilt the grid for a 3D effect */
+  box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.5); /* Add shadow for depth */
+}
+@media (max-width: 768px) {
+  .grid {
+   scale: 0.5;
+  }
+
+  .cell {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+
+.blocks {
+  margin-top: 10%;
+  display: grid;
+  position: relative;
+  max-height: 10%;
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  border: 2px solid #ffffff;
+  /* White border for visibility */
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 0, 0, 0.5);
+  transform: translateZ(0);
+  background-color: rgba(0, 0, 0, 0.7);
+  /* Semi-transparent black */
+}
+
+.cell:hover {
+  transform: scale(1.05) translateZ(10px);
+  /* Lift cell on hover */
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  /* Glowing effect on hover */
+}
+
+.empty {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.mirror{
+  position: relative;
+  border: 2px solid #00ccff;
+  box-shadow: 0 0 15px rgba(0, 204, 255, 0.641), 0 0 30px rgb(175, 212, 255);
+  transition: transform 0.3s ease;
+  background: linear-gradient(135deg, #81c8c478, #2d8fffa9) !important;
+}
+/* Base styling for all mirrors */
+.mirror180,
+.mirror90,
+.mirror45,
+.mirror-45,
+.mirror60,
+.mirror-60,
+.mirror-30,
+.mirror30 {
+  position: relative;
+  border: 2px solid #00ccff;
+  box-shadow: 0 0 15px rgba(0, 204, 255, 0.641), 0 0 30px rgb(175, 212, 255);
+  transition: transform 0.3s ease;
+  background: linear-gradient(135deg, #81c8c478, #2d8fffa9) !important;
+}
+.mirror180 {
+  transform: rotateY(180deg);
+  position: relative; /* Allows the ::after text to be positioned */
+}
+
+.mirror180::after {
+  content: "180°"; /* Display angle text */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center text */
+  font-size: 0.8em;
+  color: #050611;
+  font-weight: bold;
+  text-shadow: 0px 0px 5px rgba(0, 204, 255, 0.6);
+  pointer-events: none;
+}
+.mirror90{
+  transform: rotateY(95deg);
+  position: relative; /* Allows the ::after text to be positioned */
+}
+
+.mirror90::after {
+  content: "90°"; /* Display angle text */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center text */
+  font-size: 0.8em;
+  color: #050611;
+  font-weight: bold;
+  text-shadow: 0px 0px 5px rgba(0, 204, 255, 0.6);
+  pointer-events: none;
+}
+
+.mirror45 {
+  transform: rotateY(-45deg);
+  position: relative;
+}
+
+.mirror45::after {
+  content: "45°";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8em;
+  color: #050611;
+  font-weight: bold;
+  text-shadow: 0px 0px 5px rgba(0, 204, 255, 0.6);
+  pointer-events: none;
+}
+
+.mirror-45 {
+  transform: rotateY(45deg);
+  position: relative;
+}
+
+.mirror-45::after {
+  content: "-45°";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8em;
+  color: #050611;
+  font-weight: bold;
+  text-shadow: 0px 0px 5px rgba(0, 204, 255, 0.6);
+  pointer-events: none;
+}
+
+/* Repeat for each angle */
+.mirror30 {
+  transform: rotateY(-30deg);
+  position: relative;
+}
+
+.mirror30::after {
+  content: "30°";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8em;
+  color: #050611;
+  font-weight: bold;
+  text-shadow: 0px 0px 5px rgba(0, 204, 255, 0.6);
+  pointer-events: none;
+}
+
+.mirror-30 {
+  transform: rotateY(30deg);
+  position: relative;
+}
+
+.mirror-30::after {
+  content: "-30°";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8em;
+  color: #050611;
+  font-weight: bold;
+  text-shadow: 0px 0px 5px rgba(0, 204, 255, 0.6);
+  pointer-events: none;
+}
+.mirror-60 {
+  transform: rotateY(60deg);
+  position: relative;
+}
+
+.mirror-60::after {
+  content: "-60°";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8em;
+  color: #050611;
+  font-weight: bold;
+  text-shadow: 0px 0px 5px rgba(0, 204, 255, 0.6);
+  pointer-events: none;
+}
+.mirror60 {
+  transform: rotateY(-60deg);
+  position: relative;
+}
+
+.mirror60::after {
+  content: "60°";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8em;
+  color: #050611;
+  font-weight: bold;
+  text-shadow: 0px 0px 5px rgba(0, 204, 255, 0.6);
+  pointer-events: none;
+}
+
+/* Continue with .mirror60, .mirror-60, .mirror90 in the same way */
+
+
+.target {
+  position: relative;
+  background: linear-gradient(45deg, #5c5c8a, #0e0e3a);
+  border: 2px solid #222244;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3),
+    0 5px 10px rgba(0, 0, 0, 0.5);
+  transform-style: preserve-3d;
+  transform: translateZ(10px);
+}
+
+/* Criss-cross grid lines on the target */
+.target::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.1) 2px,
+      transparent 2px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.1) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+  border-radius: 5px;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.target::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  border: 2px solid rgba(200, 200, 200, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+.obstacle {
+  position: relative;
+  background: linear-gradient(to bottom, #5a4e37, #3e3829) !important;
+  border: 2px solid #3c3225;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5),
+    inset -3px -3px 6px rgba(0, 0, 0, 0.4),
+    inset 3px 3px 5px rgba(255, 255, 255, 0.1);
+  transform-style: preserve-3d;
+  border-radius: 4px;
+  overflow: hidden;
+  /* Prevent overflow from pseudo-elements */
+}
+
+/* Left face of obstacle */
+.obstacle::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  /* Slightly wider */
+  height: 100%;
+  left: -12px;
+  /* Adjust for the new width */
+  top: 0;
+  background: linear-gradient(to right, #5d3a1a, #8b4513) !important;
+  transform: rotateY(90deg);
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.5),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Top face of obstacle */
+.obstacle::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 12px;
+  /* Slightly taller */
+  top: -12px;
+  /* Adjust for the new height */
+  left: 0;
+  background: linear-gradient(to bottom, #8b4513, #654321) !important;
+  transform: rotateX(90deg);
+  box-shadow: 0 -3px 6px rgba(0, 0, 0, 0.5),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Add texture for realism */
+.obstacle::before,
+.obstacle::after {
+  background-image: url("path/to/your/texture.png");
+  /* Optional texture image */
+  background-size: cover;
+  /* Adjust based on your texture */
+  opacity: 0.8;
+  /* Subtle transparency for layering */
+}
+
+/* Additional highlights */
+.obstacle::after {
+  border-radius: 2px;
+  /* Slightly round the edges for a softer look */
+}
+
+/* Optional: Animation for a dynamic look */
+@keyframes shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(2deg);
+  }
+
+  50% {
+    transform: rotate(-2deg);
+  }
+
+  75% {
+    transform: rotate(1deg);
+  }
+}
+
+.obstacle:hover {
+  animation: shake 0.5s forwards;
+  /* Add shake effect on hover */
+}
+
+/* Button styling */
+/* Common button styles */
+button {
+  background-color: #0004284f;
+  padding: 10px 20px;
+  margin: 5px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  display: flex;
+  /* Align items */
+  align-items: center;
+  /* Center vertically */
+  justify-content: center;
+  /* Center horizontally */
+}
+
+/* Styles for mirror buttons */
+#horizontalMoveleft {
+  background: linear-gradient(45deg, #ff7f50, #cd5c5c);
+}
+
+#horizontalMoveright {
+  background: linear-gradient(45deg, #4682b4, #5f9ea0);
+}
+
+#verticalMovedown {
+  background: linear-gradient(45deg, #32cd32, #228b22);
+}
+
+#verticalMoveup {
+  background: linear-gradient(45deg, #ff440071, #dc143c);
+}
+
+#Rotate {
+  background: linear-gradient(45deg, #ffa500, #ff8c00);
+}
+
+#diagonalMoveupleft {
+  background: linear-gradient(45deg, #ff69b4, #db7093);
+}
+
+#diagonalMoveupright {
+  background: linear-gradient(45deg, #00bfff, #1e90ff);
+}
+
+#diagonalMovedownleft {
+  background: linear-gradient(45deg, #8a2be2, #6a5acd);
+}
+
+/* Styles for obstacle and reset buttons */
+#diagonalMovedownright {
+  background: linear-gradient(45deg, #d2691e, #cd853f);
+}
+
+#resetButton {
+  background: linear-gradient(45deg, #dc143c, #ff6347);
+}
+
+/* Hover effects */
+button:hover {
+  background-color: #005fa3;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 15px rgb(72, 158, 216);
+  border-color: rgba(177, 177, 177, 0.792);
+  /* Change border color on hover */
+}
+
+/* Icon styles */
+button::before {
+  margin-right: 8px;
+  /* Space between icon and text */
+  content: "";
+  /* Placeholder for the icon */
+}
+@media (max-width: 768px) {
+  button {
+ 
+    scale: 0.5!important;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+}
+
+/* lightource styling */
+.lightSource {
+  position: relative;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    #ffcc00 20%,
+    #ff9900 60%,
+    #ff6600 80%,
+    rgba(255, 153, 0, 0) 100%
+  );
+  box-shadow: 0 0 30px rgba(255, 204, 0, 0.8), 0 0 60px rgba(255, 204, 0, 0.6),
+    inset -10px -10px 30px rgba(255, 140, 0, 0.4),
+    /* Inner shadow for depth */ inset 10px 10px 20px rgba(255, 255, 150, 0.5); /* Inner glow */
+  animation: pulse 2s infinite;
+  transform-style: preserve-3d;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 30px rgba(255, 204, 0, 0.8), 0 0 60px rgba(255, 204, 0, 0.6),
+      inset -10px -10px 30px rgba(255, 140, 0, 0.4),
+      inset 10px 10px 20px rgba(255, 255, 150, 0.5);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 40px rgba(255, 204, 0, 1), 0 0 80px rgba(255, 204, 0, 0.8),
+      inset -15px -15px 40px rgba(255, 140, 0, 0.5),
+      inset 15px 15px 30px rgba(255, 255, 150, 0.6);
+  }
+}
+
+.laser {
+  position: relative;
+  /* Ensure proper positioning */
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 140, 0, 0.8),
+    rgba(255, 255, 0, 0.267)
+  );
+  z-index: 2;
+  /* Make sure the laser appears on top */
+}
+
+#winMessage {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 28px;
+  color: #fff;
+  background-color: rgba(46, 204, 113, 0.9);
+  padding: 15px 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(46, 204, 113, 0.7), 0 0 25px rgba(39, 174, 96, 0.6);
+  animation: fadeInScale 0.7s ease forwards, pulsate 1.5s infinite alternate;
+  z-index: 10;
+}
+
+/* Animation for fading in and scaling up */
+@keyframes fadeInScale {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Pulsating effect for glow */
+@keyframes pulsate {
+  0% {
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.7),
+      0 0 30px rgba(39, 174, 96, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(46, 204, 113, 1), 0 0 35px rgba(39, 174, 96, 0.8);
+  }
+  
+}
+
+.stages {
+  display: grid;
+  gap: 10px;
+  grid-template-rows: repeat(2, 49px);
+  grid-template-columns: repeat(5, 100px);
+}
+.stage-selector {
+  text-align: center;
+  margin: 20px;
+}
+.stage-button {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  min-width: 100%;
+  min-height: 100%;
+}
+.stage-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+.stage-button:not(:disabled) {
+  background-color: #4caf50;
+  color: white;
+}
+
+
+
+.selected {
+  border: 2px solid red;
+}
+.move-range {
+  position: relative;
+ 
+  border: 1px solid black;
+}
+
+.move-range svg {
+  width: 100%;
+  height: 100%;
+}
