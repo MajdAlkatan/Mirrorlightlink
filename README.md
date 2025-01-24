@@ -3,7 +3,14 @@
 </div>
 # 🌟 Light Path Simulation Game 🎮
 
-![Game Screenshot](screenshot.png) 
+[![Live Demo](https://img.shields.io/badge/PLAY%20DEMO-LIVE%20GAME-brightgreen?style=for-the-badge&logo=github)](https://majdalkatan.github.io/Mirrorlightlink/index)
+
+
+![Game Screenshot](./screenshots/1)
+![Game Screenshot](./screenshots/2)
+![Game Screenshot](./screenshots/3)
+
+ 
 
 ✨ **A web-based puzzle game where you bend light, solve puzzles, and unlock the mysteries of mirrors!** ✨
 
